@@ -69,6 +69,6 @@ def get_historical_price(coin, curr=CURR, timestamp=time.time()):
 
 def get_avg(coin, curr, markets):
     response = query_cryptocompare(URL_AVG.format(coin, curr, format_parameter(markets)))
-    if response: 
+    if response:
         return response['RAW']
 
