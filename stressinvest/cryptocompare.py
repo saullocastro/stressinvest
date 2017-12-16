@@ -1,4 +1,3 @@
-import sys
 import requests
 import time
 import datetime
@@ -21,7 +20,7 @@ CHANGE_PERCENT = 'CHANGEPCT24HOUR'
 MARKETCAP = 'MKTCAP'
 
 # DEFAULTS
-CURR = 'EUR'
+CURR = 'USD'
 
 ###############################################################################
 
@@ -69,6 +68,13 @@ def get_historical_price(coin, curr=CURR, timestamp=time.time()):
 
 def get_avg(coin, curr, markets):
     response = query_cryptocompare(URL_AVG.format(coin, curr, format_parameter(markets)))
-    if response: 
+    if response:
         return response['RAW']
+
+if __name__ == '__main__':
+    print(get_price('BTC'))
+    print(get_price('BTC', full=True))
+    ans = get_coin_list(format=True)
+    print(get_price(['BTC', 'LTC'], full=True))
+
 
