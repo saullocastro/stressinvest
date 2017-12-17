@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import sys
 import sqlite3
 
-from .dbinfo import COIN_LIST
+from dbinfo import COIN_LIST
 
 if __name__ == '__main__':
     assert len(sys.argv) == 2

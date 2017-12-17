@@ -16,7 +16,7 @@ max aquisicoes por segundo = aquisicoes por dia / (3600 X 24)
 max aquisicoes por segundo = 1.7
 
 '''
-SLEEP_TIME = 2
+SLEEP_TIME = 1
 COMMIT_AT_EACH_NTH_CYCLE = 10
 
 
