@@ -1,26 +1,25 @@
 from __future__ import absolute_import
-from cryptocompare import get_price
 
 DB_TABLE_ORDER = [
-'TIMESTAMP',
-'LASTUPDATE',
-'OPEN24HOUR',
-'OPENDAY',
-'LOWDAY',
-'HIGHDAY',
-'CHANGE24HOUR',
-'CHANGEPCT24HOUR',
-'CHANGEDAY',
-'MKTCAP',
-'CHANGEPCTDAY',
-'HIGH24HOUR',
-'VOLUMEDAY',
-'VOLUMEDAYTO',
-'TOTALVOLUME24HTO',
-'PRICE',
-'LOW24HOUR',
-'VOLUME24HOURTO',
-'VOLUME24HOUR',
+u'TIMESTAMP',
+u'LASTUPDATE',
+u'OPEN24HOUR',
+u'OPENDAY',
+u'LOWDAY',
+u'HIGHDAY',
+u'CHANGE24HOUR',
+u'CHANGEPCT24HOUR',
+u'CHANGEDAY',
+u'MKTCAP',
+u'CHANGEPCTDAY',
+u'HIGH24HOUR',
+u'VOLUMEDAY',
+u'VOLUMEDAYTO',
+u'TOTALVOLUME24HTO',
+u'PRICE',
+u'LOW24HOUR',
+u'VOLUME24HOURTO',
+u'VOLUME24HOUR',
 ]
 
 FULL_COIN_LIST = [u'LIFE', u'XBY', u'CSNO', u'XBS', u'ORME', u'NYC', u'AGS',
@@ -238,6 +237,3 @@ u'JPC*', u'AMBER', u'DATA', u'ANCP', u'MUT']
 
 COIN_LIST = ['LTC', 'BTC', 'ETH', 'XRP', 'DASH', 'IOT', 'BCH', 'ETC']
 
-query = get_price(COIN_LIST, full=True)
-for k, v in query.items():
-    pass
