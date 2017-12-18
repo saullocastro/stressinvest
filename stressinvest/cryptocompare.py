@@ -24,7 +24,7 @@ CURR = 'USD'
 
 ###############################################################################
 
-def query_cryptocompare(url,errorCheck=True):
+def query_cryptocompare(url, errorCheck=True):
     try:
         response = requests.get(url).json()
     except Exception as e:
