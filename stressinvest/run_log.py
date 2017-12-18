@@ -17,7 +17,7 @@ max aquisicoes por segundo = 1.7
 
 '''
 SLEEP_TIME = 1
-COMMIT_AT_EACH_NTH_CYCLE = 10
+COMMIT_AT_EACH_NTH_CYCLE = 1
 
 
 def treat_real(coin, v):
@@ -34,23 +34,24 @@ if __name__ == '__main__':
     cycle = 0
     while True:
         query = get_price(COIN_LIST, full=True)
-        timestamp = time.time()
-        tables = query['RAW']
-        for coin, d in tables.items():
-            cmd = "INSERT INTO %s VALUES(" % coin
-            cmd += "%s," % str(timestamp)
-            for key in DB_TABLE_ORDER[1:]:
-                v = d[u'USD'][key]
-                if isinstance(v, str):
-                    cmd += "'%s'" % str(v)
-                else:
-                    cmd += "%s" % str(v)
-                if key != DB_TABLE_ORDER[-1]:
-                    cmd += ",\n"
-            cmd += ");"
-            cursor.execute(cmd)
+        if query is not None:
+            timestamp = time.time()
+            tables = query['RAW']
+            for coin, d in tables.items():
+                cmd = "INSERT INTO %s VALUES(" % coin
+                cmd += "%s," % str(timestamp)
+                for key in DB_TABLE_ORDER[1:]:
+                    v = d[u'USD'][key]
+                    if isinstance(v, str):
+                        cmd += "'%s'" % str(v)
+                    else:
+                        cmd += "%s" % str(v)
+                    if key != DB_TABLE_ORDER[-1]:
+                        cmd += ",\n"
+                cmd += ");"
+                cursor.execute(cmd)
+            cycle += 1
+            if cycle == COMMIT_AT_EACH_NTH_CYCLE:
+                cycle = 0
+                db.commit()
         time.sleep(SLEEP_TIME)
-        cycle += 1
-        if cycle == COMMIT_AT_EACH_NTH_CYCLE:
-            cycle = 0
-            db.commit()
