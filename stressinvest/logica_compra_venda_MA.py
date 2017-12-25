@@ -94,6 +94,7 @@ LONG_SIZE = 20
 
 def write_func(out, num, e):
     title = 'BTC, %s, Candle Width %d min, Short Avg %d, Long Avg %d' % (e, CANDLE_WIDTH, SHORT_SIZE, LONG_SIZE)
+    print('Fetching data for: %s' % title)
     timestamp = []
     candles = []
     volume = []
