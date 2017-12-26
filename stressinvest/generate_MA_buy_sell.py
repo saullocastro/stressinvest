@@ -119,6 +119,7 @@ def write_func(coin, out, num, e, mhd='minute', candle_width=CANDLE_WIDTH, limit
             candles.append([d['low'], d['open'], d['close'], d['high']])
         timestamp = np.asarray(timestamp)
         candles = np.asarray(candles)
+        volume = np.asarray(volume)
         vclose = candles[:, 2]
         ma = MA(vclose, SHORT_SIZE, LONG_SIZE)
         # Table for HTML
@@ -127,7 +128,7 @@ def write_func(coin, out, num, e, mhd='minute', candle_width=CANDLE_WIDTH, limit
         pts2 = [0.] + ma['long']
         a1s = [''] + ma['action']
         a2s = ['' for _ in pts2]
-        for timeval, c, pt1, a1, pt2, a2 in zip(timestamp, candles, pts1, a1s, pts2, a2s):
+        for timeval, c, pt1, a1, pt2, a2, vol in zip(timestamp, candles, pts1, a1s, pts2, a2s, volume):
             if a1:
                 a1 = "'%s'" % a1
             else:
@@ -144,16 +145,19 @@ def write_func(coin, out, num, e, mhd='minute', candle_width=CANDLE_WIDTH, limit
                 pt2 = 'null'
             else:
                 pt2 = '%f' % pt2
-            th += "                ['%s', %f, %f, %f, %f, %s, %s, %s, %s],\n" % (tostr(timeval), c[0], c[1], c[2], c[3], pt1, a1, pt2, a2)
+            th += ("                ['%s', %f, %f, %f, %f, %s, %s, %s, %s, %f],\n"
+                    % (tostr(timeval), c[0], c[1], c[2], c[3], pt1, a1, pt2, a2, vol))
         lines = open('func_template.html', 'r').readlines()
         newlines = []
         for line in lines:
             newline = line.replace('%TABLE_HTML%', th)
-            newline = newline.replace('%XTITLE%', 'USD')
+            newline = newline.replace('%Y1TITLE%', 'Coin value in USD')
+            newline = newline.replace('%Y2TITLE%', 'Candle volume in USD')
             newline = newline.replace('%TITLE%', title)
             newline = newline.replace('%NUM%', '%02d' % num)
             newline = newline.replace('%LABELLINE1%', 'Avg %d' % SHORT_SIZE)
             newline = newline.replace('%LABELLINE2%', 'Avg %d' % LONG_SIZE)
+            newline = newline.replace('%LABELVOLUME%', 'Candle volume' % LONG_SIZE)
             newlines.append(newline)
     except:
         return dict()
@@ -212,7 +216,6 @@ def main():
     <script type="text/javascript">
       google.charts.load('current', {'packages':['corechart']});
 ''')
-
             for num, e in enumerate(exc):
                 all_exc.add(e)
                 ma = write_func(coin, out, num, e, mhd, candle)
@@ -233,7 +236,6 @@ def main():
 </html>
 ''')
             out.close()
-
         data = []
         buy = []
         sell = []

@@ -10,6 +10,7 @@
         data.addColumn({type:'string', role:'annotation'});
         data.addColumn({type:'number', label:'%LABELLINE2%', role:'data'});
         data.addColumn({type:'string', role:'annotation'});
+        data.addColumn({type:'number', label:'%LABELVOLUME%', role:'data'});
         data.addRows([
 %TABLE_HTML%
       ]);
@@ -18,12 +19,16 @@
       interpolateNulls: true,
       title : '%TITLE%',
       legend: {position: 'bottom', textStyle: {color: 'blue', fontSize: 16}},
-      vAxis: {title: '%XTITLE%'},
+      vAxes: {
+        0: {title: '%Y1TITLE%'},
+        1: {title: '%Y2TITLE%'},
+      },
       hAxis: {title: 'Time'},
       seriesType: 'candlesticks',
       series: {
           1: {type: 'line'},
           2: {type: 'line'},
+          3: {type: 'bar'},
       }
     };
 
