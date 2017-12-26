@@ -1,2 +1,5 @@
 __pycache__
 *.py[co]
+graphs_*.html
+index*.html*
+decision_table*.html
