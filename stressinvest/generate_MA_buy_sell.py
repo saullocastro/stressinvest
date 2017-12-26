@@ -128,6 +128,7 @@ def write_func(coin, out, num, e, mhd='minute', candle_width=CANDLE_WIDTH, limit
         pts2 = [0.] + ma['long']
         a1s = [''] + ma['action']
         a2s = ['' for _ in pts2]
+        barsty = 'fill-color: #2E8B57; fill-opacity: 0.4'
         for timeval, c, pt1, a1, pt2, a2, vol in zip(timestamp, candles, pts1, a1s, pts2, a2s, volume):
             if a1:
                 a1 = "'%s'" % a1
@@ -145,8 +146,8 @@ def write_func(coin, out, num, e, mhd='minute', candle_width=CANDLE_WIDTH, limit
                 pt2 = 'null'
             else:
                 pt2 = '%f' % pt2
-            th += ("                ['%s', %f, %f, %f, %f, %s, %s, %s, %s, %f],\n"
-                    % (tostr(timeval), c[0], c[1], c[2], c[3], pt1, a1, pt2, a2, vol))
+            th += ("                ['%s', %f, %f, %f, %f, %s, %s, %s, %s, %f, '%s'],\n"
+                    % (tostr(timeval), c[0], c[1], c[2], c[3], pt1, a1, pt2, a2, vol, barsty))
         lines = open('func_template.html', 'r').readlines()
         newlines = []
         for line in lines:
