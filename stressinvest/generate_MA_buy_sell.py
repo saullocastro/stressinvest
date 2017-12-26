@@ -1,9 +1,12 @@
 import time
+import os
+import getpass
 
 import numpy as np
 import ipy_table
 
 from cryptocompare import get_histo, EXCHANGES, COIN_LIST
+
 
 def MA(close, MA_short_size, MA_long_size):
     MA_short = [0]
@@ -100,7 +103,7 @@ SHORT_SIZE = 5
 LONG_SIZE = 21
 
 def tostr(t):
-    return time.strftime("%m-%d %H:%M:%S", time.localtime(t))
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(t))
 
 def write_func(coin, out, num, e, mhd='minute', candle_width=CANDLE_WIDTH, limit=LIMIT):
     try:
@@ -124,7 +127,7 @@ def write_func(coin, out, num, e, mhd='minute', candle_width=CANDLE_WIDTH, limit
         pts2 = [0.] + ma['long']
         a1s = [''] + ma['action']
         a2s = ['' for _ in pts2]
-        for timeval, candle, pt1, a1, pt2, a2 in zip(timestamp, candles, pts1, a1s, pts2, a2s):
+        for timeval, c, pt1, a1, pt2, a2 in zip(timestamp, candles, pts1, a1s, pts2, a2s):
             if a1:
                 a1 = "'%s'" % a1
             else:
@@ -141,7 +144,7 @@ def write_func(coin, out, num, e, mhd='minute', candle_width=CANDLE_WIDTH, limit
                 pt2 = 'null'
             else:
                 pt2 = '%f' % pt2
-            th += "                ['%s', %f, %f, %f, %f, %s, %s, %s, %s],\n" % (tostr(timeval), *candle, pt1, a1, pt2, a2)
+            th += "                ['%s', %f, %f, %f, %f, %s, %s, %s, %s],\n" % (tostr(timeval), c[0], c[1], c[2], c[3], pt1, a1, pt2, a2)
         lines = open('func_template.html', 'r').readlines()
         newlines = []
         for line in lines:
@@ -160,40 +163,49 @@ def write_func(coin, out, num, e, mhd='minute', candle_width=CANDLE_WIDTH, limit
     return ma
 
 
-mhds = ['minute', 'hour', 'hour']
-candles = [30, 4, 6]
+def main():
+    now = tostr(time.time())
+    if getpass.getuser().lower() == 'root':
+        outdir = '/var/www/html/'
+    else:
+        outdir = '.'
 
-out = open('index.html', 'w')
-out.write('''
+    mhds = ['minute', 'hour', 'hour']
+    candles = [30, 4, 6]
+
+    out = open(os.path.join(outdir, 'index.html'), 'w')
+    out.write('''
 <html>
   <body>
     <div id="intro">
         <br>
+        <h2>Last update {last_update}</h2>
         <h2>All data below generated using short MA 5 e long MA 21</h2>
-''')
+'''.format(last_update=now))
 
-for candle, mhd in zip(candles, mhds):
-    out.write("        <h2><a href='decision_table_candle_%03d_%s.html'> Decision table candle %03d %s</a></h2>\n" % (candle, mhd, candle, mhd))
-for coin in COIN_LIST:
     for candle, mhd in zip(candles, mhds):
-        out.write("        <h2><a href='graphs_%s_candle_%03d_%s.html'> %s, candle %03d %s</a></h2>\n" % (coin, candle, mhd, coin, candle, mhd))
-out.write('''
+        out.write("        <h2><a href='decision_table_candle_%03d_%s.html'> Decision table candle %03d %s</a></h2>\n" % (candle, mhd, candle, mhd))
+    for coin in COIN_LIST:
+        for candle, mhd in zip(candles, mhds):
+            out.write("        <h2><a href='graphs_%s_candle_%03d_%s.html'> %s, candle %03d %s</a></h2>\n" % (coin, candle, mhd, coin, candle, mhd))
+    out.write('''
     </div>
   </body>
 </html>
 ''')
-out.close()
+    out.close()
 
 
-for candle, mhd in zip(candles, mhds):
-    all_exc = set()
-    decision_table = {}
-    for coin in COIN_LIST:
-        decision_table[coin] = {}
-        row = []
-        exc = EXCHANGES.get(coin, EXCHANGES['BTC'])
-        out = open('graphs_%s_candle_%03d_%s.html' % (coin, candle, mhd), 'w')
-        out.write('''
+    for candle, mhd in zip(candles, mhds):
+        all_exc = set()
+        decision_table = {}
+        for coin in COIN_LIST:
+            decision_table[coin] = {}
+            row = []
+            exc = EXCHANGES.get(coin, EXCHANGES['BTC'])
+            html = 'graphs_%s_candle_%03d_%s.html' % (coin, candle, mhd)
+            out = open(os.path.join(outdir, html), 'w')
+            out.write('''
 <html>
   <head>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -201,55 +213,61 @@ for candle, mhd in zip(candles, mhds):
       google.charts.load('current', {'packages':['corechart']});
 ''')
 
-        for num, e in enumerate(exc):
-            all_exc.add(e)
-            ma = write_func(coin, out, num, e, mhd, candle)
-            for action in ma['action'][::-1]:
-                if action:
-                    break
-            decision_table[coin][e] = action
-        out.write('''
+            for num, e in enumerate(exc):
+                all_exc.add(e)
+                ma = write_func(coin, out, num, e, mhd, candle)
+                for action in ma['action'][::-1]:
+                    if action:
+                        break
+                decision_table[coin][e] = action
+            out.write('''
     </script>
   </head>
   <body>
 ''')
 
-        for num, e in enumerate(exc):
-            out.write('    <div id="chart_div%02d" style="height: 700px;"></div>\n' % num)
-        out.write('''
+            for num, e in enumerate(exc):
+                out.write('    <div id="chart_div%02d" style="height: 700px;"></div>\n' % num)
+            out.write('''
   </body>
 </html>
 ''')
-        out.close()
+            out.close()
 
-    data = []
-    buy = []
-    sell = []
-    data.append(['Exchange'] + COIN_LIST)
-    for i, e in enumerate(sorted(list(all_exc))):
-        row = [e]
-        for j, coin in enumerate(COIN_LIST):
-            d = decision_table[coin].get(e)
-            if d == 'buy':
-                buy.append([i, j])
-            if d == 'sell':
-                sell.append([i, j])
-            row.append(d)
-        data.append(row)
+        data = []
+        buy = []
+        sell = []
+        data.append(['Exchange'] + COIN_LIST)
+        for i, e in enumerate(sorted(list(all_exc))):
+            row = [e]
+            for j, coin in enumerate(COIN_LIST):
+                d = decision_table[coin].get(e)
+                if d == 'buy':
+                    buy.append([i, j])
+                if d == 'sell':
+                    sell.append([i, j])
+                row.append(d)
+            data.append(row)
 
-    table = ipy_table.make_table(data)
-    for i in range(len(data)):
+        table = ipy_table.make_table(data)
+        for i in range(len(data)):
+            for j in range(len(data[0])):
+                table.set_cell_style(i, j, width=60, align='center')
+        for i in range(len(data)):
+            table.set_cell_style(i, 0, bold=True, align='left')
         for j in range(len(data[0])):
-            table.set_cell_style(i, j, width=60, align='center')
-    for i in range(len(data)):
-        table.set_cell_style(i, 0, bold=True, align='left')
-    for j in range(len(data[0])):
-        table.set_cell_style(0, j, bold=True)
+            table.set_cell_style(0, j, bold=True)
 
-    for i, j in sell:
-        table.set_cell_style(i+1, j+1, color='red')
-    for i, j in buy:
-        table.set_cell_style(i+1, j+1, color='green')
+        for i, j in sell:
+            table.set_cell_style(i+1, j+1, color='red')
+        for i, j in buy:
+            table.set_cell_style(i+1, j+1, color='green')
+        html = 'decision_table_candle_%03d_%s.html' % (candle, mhd)
+        with open(os.path.join(outdir, html), 'w') as out:
+            out.write(table._repr_html_())
 
-    with open('decision_table_candle_%03d_%s.html' % (candle, mhd), 'w') as out:
-        out.write(table._repr_html_())
+if __name__ == '__main__':
+    while True:
+        main()
+        time.sleep(60 * 4)
+
