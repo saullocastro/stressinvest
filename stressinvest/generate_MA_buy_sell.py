@@ -157,7 +157,7 @@ def write_func(coin, out, num, e, mhd='minute', candle_width=CANDLE_WIDTH, limit
             newline = newline.replace('%NUM%', '%02d' % num)
             newline = newline.replace('%LABELLINE1%', 'Avg %d' % SHORT_SIZE)
             newline = newline.replace('%LABELLINE2%', 'Avg %d' % LONG_SIZE)
-            newline = newline.replace('%LABELVOLUME%', 'Candle volume' % LONG_SIZE)
+            newline = newline.replace('%LABELVOLUME%', 'Candle volume')
             newlines.append(newline)
     except:
         return dict()
