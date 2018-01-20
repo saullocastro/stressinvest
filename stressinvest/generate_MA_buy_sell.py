@@ -220,7 +220,7 @@ def main():
             for num, e in enumerate(exc):
                 all_exc.add(e)
                 ma = write_func(coin, out, num, e, mhd, candle)
-                for action in ma['action'][::-1]:
+                for action in ma.get('action', [])[::-1]:
                     if action:
                         break
                 decision_table[coin][e] = action
