@@ -5,7 +5,7 @@ import sqlite3
 import datetime
 import talib
 import math
-
+from generate_buy_sell_html import generate_buy_sell_html
 from strategy import strategy_ema
 from aux_functions import convert_candle
 
@@ -62,6 +62,16 @@ plus_di=talib.PLUS_DI(outcandles[:,4], outcandles[:,1], outcandles[:,3], timeper
 minus_di=talib.MINUS_DI(outcandles[:,4], outcandles[:,1], outcandles[:,3], timeperiod=14) #MINUS_DI(high, low, close, timeperiod=14)
 
 slowk, slowd = talib.STOCH(outcandles[:,4], outcandles[:,1], outcandles[:,3], fastk_period=5, slowk_period=3, slowk_matype=0, slowd_period=3, slowd_matype=0)
-# Write Graph
 
+# Write Graph
+html_path="teste.html"
+generate_buy_sell_html(outcandles,
+        decision_table,
+        short_ema,
+        long_ema,
+        plus_di,
+        minus_di,
+        slowk,
+        slowd,
+        html_path)
 # Write Backtest Results - Buy N HOld, profit for each transaction 
