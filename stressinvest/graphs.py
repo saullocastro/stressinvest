@@ -25,24 +25,21 @@ def create_graph_candle(num, candle_array, avg_short, avg_long, decision_array):
         th = ''
         dummy_array = ['' for _ in avg_long]
         barsty = 'fill-color: #2E8B57; fill-opacity: 0.4'
+        def treat_val(val):
+            if val == '':
+                return 'null'
+            if not isinstance(val, str):
+                if np.isnan(val):
+                    return 'null'
+            else:
+                return "'%s'" % val
+            return '%f' % val
         for timeval, c, pt1, a1, pt2, a2, vol in zip(timestamp, candles,
                 avg_short, decision_array, avg_long, dummy_array, volume):
-            if a1:
-                a1 = "'%s'" % a1
-            else:
-                a1 = 'null'
-            if a2:
-                a2 = "'%s'" % a2
-            else:
-                a2 = 'null'
-            if not pt1:
-                pt1 = 'null'
-            else:
-                pt1 = '%f' % pt1
-            if not pt2:
-                pt2 = 'null'
-            else:
-                pt2 = '%f' % pt2
+            a1 = treat_val(a1)
+            a2 = treat_val(a2)
+            pt1 = treat_val(pt1)
+            pt2 = treat_val(pt2)
             th += ("                ['%s', %f, %f, %f, %f, %s, %s, %s, %s, %f, '%s'],\n"
                     % (tostr(timeval), c[0], c[1], c[2], c[3], pt1, a1, pt2, a2, vol, barsty))
         template = os.path.join(THIS_DIR, 'graph_candle_template.html')
@@ -59,6 +56,7 @@ def create_graph_candle(num, candle_array, avg_short, avg_long, decision_array):
             newline = newline.replace('%LABELVOLUME%', 'Candle volume')
             newlines.append(newline)
     except:
+        raise
         return ''
     out = '      google.charts.setOnLoadCallback(drawGraphCandle%02d);\n' % num
     for newline in newlines:
