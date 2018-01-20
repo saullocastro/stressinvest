@@ -8,6 +8,7 @@ import math
 from generate_buy_sell_html import generate_buy_sell_html
 from strategy import strategy_ema
 from aux_functions import convert_candle
+from backtest_calc import backtest_calc
 
 # Read Database
 conn = sqlite3.connect('bitfinex_0.1.db')
@@ -41,18 +42,23 @@ candles=np.array(cursor.fetchall()) #id, start, open, high, low, close, , vwp, v
 #candles=candles[:, [1,2,3,4,5,7]]# simplify to timestamp, open, high, low, close, volume
 candles=candles[:, [1,4,2,5,3,7]]# simplify to timestamp, low, open, close, high, volume
 
+# Select timestamp
+initial_time=1
+final_time=1
+
+
 # Pass Database to strategy - will return buy/sell points
-outperiod=30*60 #seconds
+outperiod=60*60 #seconds
 
 decision_table=strategy_ema(candles, outperiod)
 
+# Convert Candles
+outcandles=convert_candle(candles,outperiod)
+    
 # Backtest - Calculate transactions
-
+backtest_results=backtest_calc(candles, outcandles, decision_table)
 
 # Post-processing
-
-# Convert Candles
-outcandles=convert_candle(candles,30*60)
 
 # Calculate Indicators - EMA, DMI, Stoch
 short_ema=talib.EMA(outcandles[:,3], timeperiod=9)
@@ -69,9 +75,16 @@ generate_buy_sell_html(outcandles,
         decision_table,
         short_ema,
         long_ema,
-        plus_di,
-        minus_di,
-        slowk,
-        slowd,
+        [[plus_di, minus_di,'Plus DI', 'Minus DI'],
+        [slowk, slowd,'Slow K', 'Slow D']],
         html_path)
 # Write Backtest Results - Buy N HOld, profit for each transaction 
+
+#for transaction in backtest_results:
+print backtest_results[-1]
+print(outcandles[0,3])
+print(outcandles[-1,3])
+print(outcandles[-1,3]/outcandles[0,3])   
+
+for i in backtest_results:
+    print i

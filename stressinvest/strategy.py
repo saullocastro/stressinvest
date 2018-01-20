@@ -4,10 +4,10 @@ import math
 
 def strategy_ema(candles, outperiod):
     # Define the decision period - in minutes
-    decision_period=30
+    decision_period=outperiod
     
     # Convert candles to decision period
-    outcandles=convert_candle(candles,decision_period*60)
+    outcandles=convert_candle(candles,decision_period)
     
     # Calculate indicators - EMA, DMI
     short_ema=talib.EMA(outcandles[:,3], timeperiod=9)
@@ -26,11 +26,11 @@ def strategy_ema(candles, outperiod):
         else:
             decision_table.append("")
             if ema_diff[i]>0 and ema_diff[i-1]<0: # if crossed from below, buys
-                if dm_diff[i]>0: # confirm with directional movement
-                    decision_table[i]="buy"
+                #if dm_diff[i]>0: # confirm with directional movement
+                decision_table[i]="buy"
             elif ema_diff[i]<0 and ema_diff[i-1]>0: #if cross from above, sells
-                if dm_diff[i]<0: # confirm with directional movement
-                    decision_table[i]="sell"
+                #if dm_diff[i]<0: # confirm with directional movement
+                decision_table[i]="sell"
                 
         # Check if it has crossed the ema_diff
         
