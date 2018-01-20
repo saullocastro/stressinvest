@@ -16,8 +16,6 @@ def tostr(t):
 
 def create_graph_candle(num, candle_array, avg_short, avg_long, decision_array):
     try:
-        title = 'Title'
-        print('Fetching data for: %s' % title)
         timestamp = candle_array[:, 0]
         candles = candle_array[:, 1:5]
         volume = candle_array[:, 5]
@@ -49,8 +47,7 @@ def create_graph_candle(num, candle_array, avg_short, avg_long, decision_array):
             newline = line.replace('%TABLE_HTML%', th)
             newline = newline.replace('%Y1TITLE%', 'Coin value in USD')
             newline = newline.replace('%Y2TITLE%', 'Candle volume in USD')
-            newline = newline.replace('%TITLE%', title)
-            newline = newline.replace('%NUM%', '%02d' % num)
+            newline = newline.replace('%NUM%', '%03d' % num)
             newline = newline.replace('%LABELLINE1%', 'Avg %d' % SHORT_SIZE)
             newline = newline.replace('%LABELLINE2%', 'Avg %d' % LONG_SIZE)
             newline = newline.replace('%LABELVOLUME%', 'Candle volume')
@@ -58,18 +55,18 @@ def create_graph_candle(num, candle_array, avg_short, avg_long, decision_array):
     except:
         raise
         return ''
-    out = '      google.charts.setOnLoadCallback(drawGraphCandle%02d);\n' % num
+    out = '      google.charts.setOnLoadCallback(drawGraphCandle%03d);\n' % num
     for newline in newlines:
         out += newline
     return out
 
 
-def create_graph_indicator(num, candle_array, plus_di, minus_di, slow_k, slow_d):
+def create_graph_indicator(num, candle_array, ind1, ind2, label1, label2):
     try:
         timestamp = candle_array[:, 0]
         # Table for HTML
         th = ''
-        for timeval, pt1, pt2, pt3, pt4 in zip(timestamp, plus_di, minus_di, slow_k, slow_d):
+        for timeval, pt1, pt2 in zip(timestamp, ind1, ind2):
             def treat_pt(pt):
                 if np.isnan(pt):
                     pt = 'null'
@@ -78,24 +75,21 @@ def create_graph_indicator(num, candle_array, plus_di, minus_di, slow_k, slow_d)
                 return pt
             pt1 = treat_pt(pt1)
             pt2 = treat_pt(pt2)
-            pt3 = treat_pt(pt3)
-            pt4 = treat_pt(pt4)
-            th += ("                ['%s', %f, %f, %f, %f],\n"
-                    % (tostr(timeval), pt1, pt2, pt3, pt4))
+            th += ("                ['%s', %s, %s],\n"
+                    % (tostr(timeval), pt1, pt2))
         template = os.path.join(THIS_DIR, 'graph_indicator_template.html')
         lines = open(template, 'r').readlines()
         newlines = []
         for line in lines:
             newline = line.replace('%TABLE_HTML%', th)
-            newline = newline.replace('%NUM%', '%02d' % num)
-            newline = newline.replace('%LABELLINE1%', 'Plus DI')
-            newline = newline.replace('%LABELLINE2%', 'Minus DI')
-            newline = newline.replace('%LABELLINE3%', 'Slow K')
-            newline = newline.replace('%LABELLINE4%', 'Slow D')
+            newline = newline.replace('%NUM%', '%03d' % num)
+            newline = newline.replace('%LABELLINE1%', label1)
+            newline = newline.replace('%LABELLINE2%', label2)
             newlines.append(newline)
     except:
+        raise
         return ''
-    out = '      google.charts.setOnLoadCallback(drawGraphIndicator%02d);\n' % num
+    out = '      google.charts.setOnLoadCallback(drawGraphIndicator%03d);\n' % num
     for newline in newlines:
         out += newline
     return out
