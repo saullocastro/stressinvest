@@ -1,0 +1,23 @@
+  function drawGraphIndicator%NUM%() {
+        // Some raw data (not necessarily accurate)
+        var data = new google.visualization.DataTable();
+        data.addColumn({type:'string', label:'Date', role:'domain'});
+        data.addColumn({type:'number', label:'%LABELLINE1%', role:'data'});
+        data.addColumn({type:'number', label:'%LABELLINE2%', role:'data'});
+        data.addColumn({type:'number', label:'%LABELLINE3%', role:'data'});
+        data.addColumn({type:'number', label:'%LABELLINE4%', role:'data'});
+        data.addRows([
+%TABLE_HTML%
+      ]);
+
+    var options = {
+      interpolateNulls: true,
+      title : '%TITLE%',
+      legend: {position: 'bottom', textStyle: {color: 'blue', fontSize: 16}},
+      hAxis: {title: 'Time'},
+      seriesType: 'line',
+    };
+
+    var chart = new google.visualization.ComboChart(document.getElementById('indicator_div%NUM%'));
+    chart.draw(data, options);
+  }

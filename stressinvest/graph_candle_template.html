@@ -1,4 +1,4 @@
-      function drawVisualization%NUM%() {
+  function drawGraphCandle%NUM%() {
         // Some raw data (not necessarily accurate)
         var data = new google.visualization.DataTable();
         data.addColumn({type:'string', label:'Date', role:'domain'});
@@ -33,6 +33,6 @@
       }
     };
 
-    var chart = new google.visualization.ComboChart(document.getElementById('chart_div%NUM%'));
+    var chart = new google.visualization.ComboChart(document.getElementById('candle_div%NUM%'));
     chart.draw(data, options);
   }
