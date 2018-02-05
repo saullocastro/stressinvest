@@ -19,7 +19,7 @@ def generate_buy_sell_html(candle_array,
         avg_short,
         avg_long,
         indicators,
-        html_path):
+        html_path,trending):
     out = open(html_path, 'w')
     out.write('''
 <html>
@@ -31,7 +31,7 @@ def generate_buy_sell_html(candle_array,
     text = ''
     num = 0
     text += create_graph_candle(num, candle_array, avg_short, avg_long,
-            decision_array)
+            decision_array,trending)
     for i, (ind1, ind2, label1, label2) in enumerate(indicators):
         if i > 99:
             raise NotImplementedError('Support for max 100 indicators')

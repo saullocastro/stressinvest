@@ -14,7 +14,7 @@ LONG_SIZE = 21
 def tostr(t):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(t))
 
-def create_graph_candle(num, candle_array, avg_short, avg_long, decision_array):
+def create_graph_candle(num, candle_array, avg_short, avg_long, decision_array,trending):
     try:
         timestamp = candle_array[:, 0]
         candles = candle_array[:, 1:5]
@@ -23,6 +23,7 @@ def create_graph_candle(num, candle_array, avg_short, avg_long, decision_array):
         th = ''
         dummy_array = ['' for _ in avg_long]
         barsty = 'fill-color: #2E8B57; fill-opacity: 0.4'
+        barstytrend = 'fill-color: #FF0000; fill-opacity: 0.4'
         def treat_val(val):
             if val == '':
                 return 'null'
@@ -32,14 +33,18 @@ def create_graph_candle(num, candle_array, avg_short, avg_long, decision_array):
             else:
                 return "'%s'" % val
             return '%f' % val
-        for timeval, c, pt1, a1, pt2, a2, vol in zip(timestamp, candles,
-                avg_short, decision_array, avg_long, dummy_array, volume):
+        for timeval, c, pt1, a1, pt2, a2, vol,trd in zip(timestamp, candles,
+                avg_short, decision_array, avg_long, dummy_array, volume,trending):
             a1 = treat_val(a1)
             a2 = treat_val(a2)
             pt1 = treat_val(pt1)
             pt2 = treat_val(pt2)
+            if trd:
+                barstyle=barstytrend
+            else:
+                barstyle=barsty
             th += ("                ['%s', %f, %f, %f, %f, %s, %s, %s, %s, %f, '%s'],\n"
-                    % (tostr(timeval), c[0], c[1], c[2], c[3], pt1, a1, pt2, a2, vol, barsty))
+                    % (tostr(timeval), c[0], c[1], c[2], c[3], pt1, a1, pt2, a2, vol, barstyle))
         template = os.path.join(THIS_DIR, 'graph_candle_template.html')
         lines = open(template, 'r').readlines()
         newlines = []
