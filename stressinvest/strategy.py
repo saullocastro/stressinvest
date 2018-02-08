@@ -149,18 +149,27 @@ def strategy_mult_hilbert(candles, long_period, short_period):
     shorttrenddiff=shortsmoothprice-shorttrendline
     shortsinediff=shortleadsine-shortsine
     
+    #downperiod
+    downperiod=long_period/4
+    downcandles=convert_candle(candles, downperiod)
+    plus_di=talib.PLUS_DI(downcandles[:,4], downcandles[:,1], downcandles[:,3], timeperiod=14) # PLUS_DI(high, low, close, timeperiod=14)
+    minus_di=talib.MINUS_DI(downcandles[:,4], downcandles[:,1], downcandles[:,3], timeperiod=14) #MINUS_DI(high, low, close, timeperiod=14)
+    didiff=plus_di-minus_di
+    
 #    short_ema=talib.EMA(outcandles[:,3], timeperiod=5)
 #    long_ema=talib.EMA(outcandles[:,3], timeperiod=20)
 #    trenddiff=smoothprice-long_ema    
 
     # Iterate over the candles and determine buy/sell
     decision_table=[]
+    decision_table_long=[]
     
     # Status variables
     advise=""
     moneystatus="sold" # starts sold
     trendingdirection=""
     for i in range(len(candles)):
+        
         # Wait warmup period
         if i<long_period/60*63:
             decision_table.append("") # do nothing
@@ -173,7 +182,6 @@ def strategy_mult_hilbert(candles, long_period, short_period):
                 if lindex==len(longcandles)-1:
                     break
             lindex-=1 #only the previous candle has been formed
-            
             # Determine current short period
             sindex=0
             while shortcandles[sindex,0]<candles[i,0]:
@@ -181,7 +189,15 @@ def strategy_mult_hilbert(candles, long_period, short_period):
                 if sindex==len(shortcandles)-1:
                     break
             sindex-=1 #only the previous candle has been formed
-
+            
+            # Determine current down period
+            dindex=0
+            while downcandles[dindex,0]<candles[i,0]:
+                dindex+=1
+                if dindex==len(downcandles)-1:
+                    break
+            dindex-=1 #only the previous candle has been formed
+            
             # check trend by the long period
             trend=longtrending[lindex]
             if lindex>0:
@@ -189,8 +205,8 @@ def strategy_mult_hilbert(candles, long_period, short_period):
                     trendingdirection="down"
                 else:
                     trendingdirection="up"
+                    
             if trend:
-#            if True:
                 if lindex>0:
                     if longtrending[lindex-1]==0: # if the previous mode was Cycle
                         if longsmoothprice[lindex]>=longtrendline[lindex] and moneystatus=="sold": # Buy if the price is higher
@@ -199,12 +215,22 @@ def strategy_mult_hilbert(candles, long_period, short_period):
                         elif longsmoothprice[lindex]<longtrendline[lindex] and moneystatus=="bought": #Sell if the price is lower
                             decision_table[i]="sell"
                             moneystatus="sold"
-                    if longtrenddiff[lindex]>0 and longtrenddiff[lindex-1]<=0 and moneystatus=="sold": # If price crosses over trendline - buys
-                        decision_table[i]="buy"
-                        moneystatus="bought"
-                    elif longtrenddiff[lindex]<0 and longtrenddiff[lindex-1]>=0 and moneystatus=="bought": # If price crosses down trendline - sells
-                        decision_table[i]="sell"   
-                        moneystatus="sold"
+                            
+                    if trendingdirection=="up":
+                        if longtrenddiff[lindex]>0 and longtrenddiff[lindex-1]<=0 and moneystatus=="sold": # If price crosses over trendline - buys
+                            decision_table[i]="buy"
+                            moneystatus="bought"
+                        elif longtrenddiff[lindex]<0 and longtrenddiff[lindex-1]>=0 and moneystatus=="bought": # If price crosses down trendline - sells
+                            decision_table[i]="sell"   
+                            moneystatus="sold"
+                            
+                    elif trendingdirection=="down":
+                        if didiff[dindex]>0 and didiff[dindex-1]<=0 and moneystatus=="sold": # If price crosses over trendline - buys
+                            decision_table[i]="buy"
+                            moneystatus="bought"
+                        elif didiff[dindex]<0 and didiff[dindex-1]>=0 and moneystatus=="bought": # If price crosses down trendline - sells
+                            decision_table[i]="sell"   
+                            moneystatus="sold"                        
             else:
                 if shortsinediff[sindex]>0 and shortsinediff[sindex-1]<=0 and moneystatus=="sold": # If price crosses over trendline - buys
                     decision_table[i]="buy"
