@@ -181,14 +181,14 @@ def strategy_mult_hilbert(candles, long_period, short_period):
                 lindex+=1
                 if lindex==len(longcandles)-1:
                     break
-            lindex-=1 #only the previous candle has been formed
+            lindex-=2 #only the previous candle has been formed
             # Determine current short period
             sindex=0
             while shortcandles[sindex,0]<candles[i,0]:
                 sindex+=1
                 if sindex==len(shortcandles)-1:
                     break
-            sindex-=1 #only the previous candle has been formed
+            sindex-=2 #only the previous candle has been formed
             
             # Determine current down period
             dindex=0
@@ -196,7 +196,7 @@ def strategy_mult_hilbert(candles, long_period, short_period):
                 dindex+=1
                 if dindex==len(downcandles)-1:
                     break
-            dindex-=1 #only the previous candle has been formed
+            dindex-=2 #only the previous candle has been formed
             
             # check trend by the long period
             trend=longtrending[lindex]
