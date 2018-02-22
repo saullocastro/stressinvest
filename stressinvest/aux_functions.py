@@ -19,6 +19,26 @@ def convert_candle(candles, outcandleperiod):
     outcandles=np.array(outcandles)
     return outcandles
 
+def convert_candle_db(candles, outcandleperiod):
+    outcandles=[]
+    initcandleperiod=int(candles[1,1]-candles[0,1]) #seconds
+    period=int(outcandleperiod/initcandleperiod)
+    #id, start, open, high, low, close, , vwp, volume, trades
+    for i in range(int(len(candles)/period)):
+        period_candles=candles[(period*i):(period*(i+1)),:]
+        candle_timestamp=period_candles[0,1] # Timestamp is the initial timestamp
+        candle_open=period_candles[0,2] # The open value is the open from the initial timestamp
+        candle_high=period_candles[:,3].max() # The high value is the maximum of the highs 
+        candle_low=period_candles[:,4].min() # The low value is the minimum of the lows
+        candle_close=period_candles[-1,5] # The close value is the close of the last timestamp
+        candle_vwp=period_candles[-1,6] # The volume is the sum of the volumes
+        candle_volume=period_candles[:,7].sum() # The volume is the sum of the volumes
+        candle_trades=period_candles[:,8].sum() # The volume is the sum of the volumes
+        outcandles.append([i,candle_timestamp,candle_open, candle_high, candle_low, candle_close, candle_vwp,candle_volume,candle_trades])
+    
+    outcandles=np.array(outcandles)
+    return outcandles
+
 def trendmode(candles):
     # constants
     pi=3.141516
