@@ -5,6 +5,7 @@ import getpass
 import math
 import sqlite3
 import datetime
+import logging
 from functools import partial
 
 import numpy as np
@@ -33,10 +34,9 @@ class TradeData(object):
         self.db_table = "candles_USDT_BTC"
         self.candle_size = 1*60*60
 
-#------------------------------------------------------------------------------
+
 def ticker(msg, td):
     # ticker
-    #print(msg)
     #id, start, open, high, low, close, , vwp, volume, trades
     s_start = msg['k']['t']/1000 #s
     s_open = msg['k']['o']
@@ -86,14 +86,15 @@ def ticker(msg, td):
             trade(decision)
         except:
             pass
-#------------------------------------------------------------------------------
+
+
 def warmup(td):
     t1 = time.time()
     t1 -= t1 % 60-60 # last full minute candle
     t0 = t1-td.warmupperiod
 
     if not os.path.isfile(td.db_name):
-        print('Creating database...')
+        logging.info('Creating database...')
         db = sqlite3.connect(td.db_name)
         cursor = db.cursor()
         #id, start, open, high, low, close, , vwp, volume, trades
@@ -192,7 +193,8 @@ def warmup(td):
     db.commit()
     db.close()
     td.b_warmedup = True
-#------------------------------------------------------------------------------
+
+
 def trade(decision):
     if td.b_realtrade:
         if decision == "buy":
@@ -229,18 +231,19 @@ def trade(decision):
         balance_1 = client.get_asset_balance(asset=td.asset1)["free"]
         balance_2 = client.get_asset_balance(asset=td.asset2)["free"]
         if decision != "":
-            with open("log.txt", 'a') as f:
-                aux = decision
-                aux += ", "+balance_1
-                aux += ", "+balance_2
-                aux += ", "+str(fee)
-                when = order["transactTime"]
-                when = datetime.datetime.fromtimestamp(float(when)).strftime('%m/%d/%Y %H:%M:%S')
-                f.write(aux)
+            aux = decision
+            aux += ", " + balance_1
+            aux += ", " + balance_2
+            aux += ", " + str(fee)
+            when = order["transactTime"]
+            when = datetime.datetime.fromtimestamp(float(when)).strftime('%m/%d/%Y %H:%M:%S')
+            logging.info(aux)
     else:
-        if decision!="":
-            print("decision")
+        if decision != "":
+            logging.info("decision")
 
+
+logging.basicConfig(filename='trader.log', level=logging.DEBUG)
 #------------------------------------------------------------------------------
 # Main Program
 # Get API Keys
