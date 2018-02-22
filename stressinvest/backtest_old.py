@@ -43,6 +43,9 @@ t2 = time.mktime(datetime.datetime(2018, 2, 5, 21, 19, 0, 0).timetuple())
 
 t2 = time.mktime(datetime.datetime(2018, 1, 21, 7, 0, 0, 0).timetuple())
 
+t1 = time.mktime(datetime.datetime(2018, 1, 1, 7, 0, 0, 0).timetuple())
+t2 = time.mktime(datetime.datetime(2018, 2, 1, 7, 0, 0, 0).timetuple())
+
 # Command to read database        
 aux_str='SELECT * FROM '
 aux_str+=table
@@ -64,10 +67,10 @@ final_time=1
 outperiod=1*60*60 #seconds
 
 #decision_table=strategy_hilbert(candles, outperiod)
-#decision_table=strategy_mult_hilbert(candles, outperiod, outperiod)
+decision_table=strategy_mult_hilbert(candles, outperiod, outperiod)
 
 
-decision_table=strategy_ema(candles, outperiod)
+#decision_table=strategy_ema(candles, outperiod)
 #decision_table=strategy_stoch(candles, outperiod)
 # Convert Candles
 outcandles=convert_candle(candles,outperiod)
@@ -80,7 +83,7 @@ for i in range(len(outcandles)):
             break
 
 # Backtest - Calculate transactions
-backtest_results=backtest_calc(candles, outcandles, decision_table)
+backtest_results=backtest_calc(candles, candles, decision_table)
 
 # Post-processing
 # Select timestamp to plot

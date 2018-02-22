@@ -2,8 +2,7 @@ from binance.client import Client
 from binance.websockets import BinanceSocketManager
 from twisted.internet import reactor
 from strategy import strategy
-import threading
-import sys
+import getpass
 import time
 import sqlite3
 import math
@@ -20,6 +19,7 @@ def ticker(msg):
     global db_name
     
     # ticker
+    #print(msg)
     #id, start, open, high, low, close, , vwp, volume, trades
     s_start=msg['k']['t']/1000 #s
     s_open=msg['k']['o']
@@ -63,9 +63,12 @@ def ticker(msg):
         db_candles=cursor.fetchall()
         db_candles.sort(key=lambda tup: tup[1]) # Order the results by timestamp
         db_candles=np.array(db_candles)
-        decision=strategy(db_candles, market_status, "ema", [60])
+        decision=strategy(db_candles, market_status, "ema", [1*60*60])
         # call trade
-        trade(decision)
+        try:
+            trade(decision)
+        except:
+            pass
 #------------------------------------------------------------------------------
 def warmup(exchange, currency, warmupperiod):
     global b_warmedup
@@ -198,7 +201,7 @@ def trade(decision):
         balance_1=client.get_asset_balance(asset=asset1)["free"]
         balance_2=client.get_asset_balance(asset=asset2)["free"]
         if decision!="":
-            with f as open("log.txt", a):
+            with open("log.txt", 'a') as f:
                 aux=decision
                 aux+=", "+balance_1
                 aux+=", "+balance_2
@@ -213,8 +216,8 @@ def trade(decision):
 #------------------------------------------------------------------------------
 # Main Program
 # Get API Keys
-api_key=""
-api_secret=""
+api_key=getpass.getpass(prompt="Insert API KEY: ")
+api_secret=getpass.getpass(prompt="Insert API SECRET: ")
 
 # Define exchance and currency
 exchange="BINANCE" # To be Implemented Additional Exchanges
@@ -230,36 +233,20 @@ db_table="candles_USDT_BTC"
 # Start Client
 client = Client(api_key, api_secret)
 bm = BinanceSocketManager(client)
-#conn_key = bm.start_kline_socket(currency, ticker, interval=client.KLINE_INTERVAL_1MINUTE)
-#bm.start() # Start ticker socket
+conn_key = bm.start_kline_socket(currency, ticker, interval=client.KLINE_INTERVAL_1MINUTE)
+bm.start() # Start ticker socket
 
 # Check Warmup Period
 b_warmedup=False
 warmupperiod= 120*60*60 #60 hours - in seconds - depends on strategy
-#warmup(exchange, currency, warmupperiod)
+warmup(exchange, currency, warmupperiod)
 # Check bought/sold status
-balance = client.get_asset_balance(asset='USDT')
-if float(balance["free"])<1.0: # this value depends for each asset - logic using USDT
+balance = client.get_asset_balance(asset=asset2)
+if float(balance["free"])<10.: # this value depends for each asset - logic using USDT
     market_status="bought"
 else:
     market_status="sold"
-
-balance = client.get_asset_balance(asset='BTC')
-precision=6
-amt_str=math.floor(float(balance["free"]) * 10**precision) / 10**precision
-amt_str = "{:0.0{}f}".format(amt_str, precision)
-# read asset2 balance
-balance_t0 = client.get_asset_balance(asset='USDT')
-balance_t0 = float(balance_t0["free"])
-order = client.order_market_sell(symbol='BTCUSDT', quantity=amt_str)
-# read asset2 balance and calculate the price
-balance_t1 = client.get_asset_balance(asset='USDT')
-balance_t1=float(balance_t1["free"])
-price=(balance_t1-balance_t0)/(1-trader_fee/100)/float(amt_str)
-# Buy or sell according to strategy
-b_realtrade=False
-#db.close()
-#reactor.stop()
+b_realtrade=True
 
 # TO DO
 # HANDLE ERROR WHEN SELLING - BinanceAPIException: APIError(code=-1013): Filter failure: LOT_SIZE

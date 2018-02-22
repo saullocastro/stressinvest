@@ -86,10 +86,10 @@ currency_1=1000. #ex: USD
 currency_2=0.    #ex: BTC
 trader_fee=0.2   #margin fee, in %
 
-t1 = time.mktime(datetime.datetime(2017, 12, 1, 7, 0, 0, 0).timetuple())
+t1 = time.mktime(datetime.datetime(2018, 1, 1, 7, 0, 0, 0).timetuple())
 #t1 = time.mktime(datetime.datetime(2018, 1, 18, 7, 0, 0, 0).timetuple())
 
-t2 = time.mktime(datetime.datetime(2018, 2, 5, 7, 0, 0, 0).timetuple())
+t2 = time.mktime(datetime.datetime(2018, 2, 1, 7, 0, 0, 0).timetuple())
 
 db = sqlite3.connect(db_name)
 cursor = db.cursor()
